@@ -1,0 +1,25 @@
+> alias snif='sudo tcpdump -i eth0  -tttt -s 1500 port not 22 and port not 53 and not arp and not rarp'
+> alias c='clear'
+> alias ls='ls --color=auto'
+> alias ll='ls -la'
+> alias mount='mount |column -t'
+> alias h='history'
+> alias df='df -H'
+> alias du='du -ch'
+> #Config
+> alias noc='grep -Ev '\''^(#|$)'\'''
+> #Net
+> alias fping='ping -c 100 -s.2'
+> alias ports='netstat -tulanp'
+<> alias snif='sudo tcpdump -i eth0  -tttt -s 1500 port not 22 and port not 53 and not arp and not rarp'
+<> #Services
+<> alias teht='sudo /usr/sbin/apache2ctl -t && /usr/sbin/apache2ctl -t -D DUMP_VHOSTS'
+<> alias viht='sudo /usr/sbin/apache2ctl status'
+<> alias reht='sudo /usr/sbin/apache2ctl -k graceful'
+<> #Processes
+<> alias ps='ps aux | awk '"'"'$5 != 0'"'"''
+<> alias psmem='ps | tail -n+2 | sort -nr -k 4 | head  -n 8'
+<> alias pscpu='ps | tail -n+2 | sort -nr -k 3 | head  -n 8'
+<> #Commands
+<> history -c
+<> export HISTIGNORE="pwd:ls:ll:cd"

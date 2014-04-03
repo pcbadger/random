@@ -1,0 +1,181 @@
+
+<?php
+#if(!empty($_GET['wordcsv']) ) {
+#  $wordcsv = $_GET['wordcsv'];
+#}
+#$words = array_filter(explode("\n",file_get_contents("sensi-words.csv")));
+#$wordcsv = "allwords.csv";
+
+$wordcsv = $_POST['wordlistdropdown'];
+if (empty($wordcsv)) {
+#	$wordcsv = $_POST['wordlistdropdown'];
+
+#} else {
+	$wordcsv = "sensi-words.csv";
+}
+
+$numofpword = $_POST['numberofpasswordsinput'];
+if (empty($numofpword)) {
+        $numofpword = "1";
+}
+
+
+
+$numofword = $_POST['numberofwordsinput'];
+if (empty($numofword)) {
+        $numofword = "3";
+}
+
+if ( $numofpword > 1000) { $numofpword = "1000";}
+if ( $numofword < 2) { $numofword = "2";}
+if ( $numofword > 10) { $numofword = "10";}
+
+
+
+$capitalstatus = $_POST['caplistdropdown'];
+if (empty($capitalstatus)) {
+        $capitalstatus = "capitalwords";
+}
+
+
+
+$words = array_filter(explode("\n",file_get_contents("$wordcsv")));
+$wordCount = count($words);
+
+#echo $wordcsv
+
+// generate a random 5 letter word then get suggestions for it
+#$qty = 1;
+$passwords = array();
+$wordupper = "maybe";
+
+#if(!empty($_GET['qty']) && is_numeric($_GET['qty'])) {
+  $qty = (int)$numofpword;
+#}
+for($i=0;$i<$qty;$i++) {
+  $wordList = array();
+  while(count($wordList) < $numofword) {
+    $suggestion = $words[rand(0,$wordCount-1)];
+    if(isSuitableWord($suggestion)) {
+      $suggestion = strtolower($suggestion);
+
+        if  ( $capitalstatus == "nocaps" )  {
+                $suggestion = strtolower($suggestion);
+        }
+#else{
+
+#      if(empty($_GET['caps'])) {
+        // make one of the words randomly uppercase
+	// I wrote this code to alternate between upper and lower case
+	// it doesn't do that but I prefer what it does do
+	if ( $capitalstatus == "capitalwords" )	{
+        	$wordupperness = rand(0,500);
+#                if ( $wordupper = "maybe" )     {
+                        if ( $wordupperness > 250)         {
+                                $suggestion = strtoupper($suggestion);
+#                                $wordupper = "no";
+                                                        }
+                        else            {
+                                $suggestion = $suggestion;
+#                                $wordupper = "yes";
+                                        }
+#                                                }
+ #               else            {
+ #                       if ( $wordupper = "yes" )       {
+ #                               $suggestion = strtoupper($suggestion);
+  #                              $wordupper = "no";
+   #                                                     }
+    #                    else
+     #                   {
+      #                          $suggestion = $suggestion;
+       #                         $wordupper = "yes";
+        #                }
+#                                }
+#                                        }
+}
+#else
+#{
+	if  ( $capitalstatus == "capitalletters" )  {
+
+		
+        	// make one of the words randomly uppercase
+        	$suggestion = strtolower($suggestion);
+		$characterIndex = rand(0,strlen($suggestion)-1);
+        	$suggestion[$characterIndex] = strtoupper($suggestion[$characterIndex]);
+							}
+	
+#	else
+
+#	{
+#        if  ( $capitalstatus = "nocaps" )  {
+#		$wordupperness = 0;
+#		$suggestion = strtolower($suggestion);	
+#	}	
+#}
+#}
+      $wordList[] = $suggestion;
+      $foundSuitableWord = true;
+    }
+  }
+  // add a 4 digit number to the end
+  $pin1 = rand(0000,9999);
+  $pin = str_pad("$pin1", 4, '0', STR_PAD_LEFT); 
+
+// $pin = rand(1000,9999);
+  $wordList[] = $pin;
+  shuffle($wordList);
+  $separators = '@#$%:-_^!&*';
+  $pass = implode($separators[ rand(0,strlen($separators)-1) ],$wordList);
+  $passwords[] = $pass;
+}
+if(empty($_GET['raw'])) {
+  echo '<pre>';
+  echo implode(PHP_EOL, $passwords);
+  echo '</pre>';
+} else {
+  echo implode(PHP_EOL, $passwords);
+}
+
+
+function isSuitableWord($word) {
+  if(strlen($word) <= $numofword) {
+    return false;
+  }
+
+  if(!preg_match('/^[a-z0-9]*$/', $word)) {
+    return false;
+  }
+
+  return true;
+}
+
+?>
+<form action="password.php" method="post">
+
+Options: (Alpha testing, may not work yet)
+<br>
+<select name="wordlistdropdown">
+<option value="sensi-words.csv">Sensible</option>
+<option value="words.csv">Complexer words</option>
+<option value="allthewords.csv">Loads of words</option>
+<option value="monkeylist.csv">monkeys</option>
+<option value="commonpasswords.csv">common</option>
+<option value="bums.csv">test list</option>
+
+</select>
+<br>
+<select name="caplistdropdown">
+<option value="capitalwords">CAPITAL words</option>
+<option value="capitalletters">cApitaL LeTters</option>
+<option value="nocaps">lower case</option>
+
+</select>
+<br>
+How many passwords you want? <input type="number" name="numberofpasswordsinput" max="1000" style="width: 40px;"  /> (Max: 1000)
+<br>
+How many words in you want in each password? <input type="number" name="numberofwordsinput" min="2" max="10" style="width: 20px;"  /> (Max: 10)
+
+<br>
+<p><input type="submit" value="Do it!"></p>
+</form>
+
